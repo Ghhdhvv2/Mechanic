@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Issy's Garage — Independent Mechanic</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0c0c0c;
+      --dark: #141414;
+      --mid: #1e1e1e;
+      --steel: #2a2a2a;
+      --border: #333;
+      --muted: #666;
+      --light: #aaa;
+      --white: #f0ece3;
+      --amber: #e8820c;
+      --amber-bright: #f5a623;
+      --amber-dim: #8a4d07;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 300;
+      line-height: 1.7;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      width: 12px; height: 12px;
+      background: var(--amber);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease;
+      mix-blend-mode: screen;
+    }
+    .cursor.grow { width: 32px; height: 32px; }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 3rem;
+      background: rgba(12,12,12,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.12em;
+      color: var(--amber);
+    }
+    .nav-logo span { color: var(--white); }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2.5rem;
+    }
+    nav ul a {
+      text-decoration: none;
+      color: var(--light);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    nav ul a:hover { color: var(--amber); }
+    .nav-cta {
+      background: var(--amber);
+      color: var(--black) !important;
+      padding: 0.5rem 1.2rem;
+      font-weight: 500 !important;
+      transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: var(--amber-bright) !important; color: var(--black) !important; }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Noise texture overlay */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.6;
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 8rem 4rem 6rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-tag {
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.2s forwards;
+    }
+
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(5rem, 9vw, 9rem);
+      line-height: 0.9;
+      letter-spacing: 0.02em;
+      color: var(--white);
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.4s forwards;
+    }
+    h1 .accent { color: var(--amber); display: block; }
+
+    .hero-sub {
+      margin-top: 2rem;
+      max-width: 380px;
+      font-size: 0.82rem;
+      color: var(--light);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.8;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.6s forwards;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.8s forwards;
+    }
+    .btn-primary {
+      background: var(--amber);
+      color: var(--black);
+      border: none;
+      padding: 0.9rem 2rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: none;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { background: var(--amber-bright); transform: translateY(-2px); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--white);
+      border: 1px solid var(--border);
+      padding: 0.9rem 2rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: none;
+      transition: border-color 0.2s, color 0.2s, transform 0.15s;
+    }
+    .btn-ghost:hover { border-color: var(--amber); color: var(--amber); transform: translateY(-2px); }
+
+    .hero-right {
+      position: relative;
+      background: var(--dark);
+      overflow: hidden;
+      z-index: 2;
+    }
+    .hero-right::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -3px;
+      width: 6px; height: 100%;
+      background: var(--amber);
+    }
+
+    /* Gear illustration in hero */
+    .hero-graphic {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.05;
+    }
+    .hero-graphic svg { width: 70%; height: 70%; }
+
+    .hero-stats {
+      position: absolute;
+      bottom: 4rem;
+      left: 3rem;
+      right: 3rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      z-index: 3;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 1s forwards;
+    }
+    .stat {
+      background: var(--dark);
+      padding: 1.5rem;
+    }
+    .stat-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.8rem;
+      color: var(--amber);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+
+    /* Diagonal divider */
+    .divider {
+      height: 2px;
+      background: linear-gradient(90deg, var(--amber), transparent);
+      margin: 0;
+    }
+
+    /* Sections */
+    section { padding: 7rem 3rem; }
+    .section-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 0.8rem;
+    }
+    h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 5vw, 5rem);
+      letter-spacing: 0.03em;
+      line-height: 1;
+    }
+
+    /* Services */
+    #services {
+      background: var(--dark);
+    }
+    .services-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: end;
+      margin-bottom: 5rem;
+    }
+    .services-header p {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 300;
+      color: var(--light);
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+    .service-card {
+      background: var(--mid);
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+    .service-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 2px;
+      background: var(--amber);
+      transition: width 0.4s ease;
+    }
+    .service-card:hover { background: var(--steel); }
+    .service-card:hover::before { width: 100%; }
+    .service-num {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--amber-dim);
+      margin-bottom: 1.5rem;
+    }
+    .service-card h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.8rem;
+    }
+    .service-card p {
+      font-size: 0.78rem;
+      color: var(--light);
+      line-height: 1.7;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 300;
+    }
+    .service-icon {
+      position: absolute;
+      top: 2rem; right: 2rem;
+      width: 36px; height: 36px;
+      opacity: 0.15;
+    }
+
+    /* About */
+    #about {
+      background: var(--black);
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 6rem;
+      align-items: center;
+      padding: 7rem 3rem;
+    }
+    .about-content .section-label { margin-bottom: 1rem; }
+    .about-content h2 { margin-bottom: 2rem; }
+    .about-content p {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 300;
+      color: var(--light);
+      font-size: 0.9rem;
+      line-height: 1.9;
+      margin-bottom: 1.5rem;
+    }
+    .about-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 2rem;
+    }
+    .badge {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.4rem 0.9rem;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .badge:hover { border-color: var(--amber); color: var(--amber); }
+    .about-visual {
+      position: relative;
+    }
+    .about-box {
+      background: var(--mid);
+      border: 1px solid var(--border);
+      padding: 3rem;
+      position: relative;
+    }
+    .about-box::before {
+      content: '';
+      position: absolute;
+      top: -6px; left: -6px;
+      width: 30%; height: 30%;
+      border-top: 2px solid var(--amber);
+      border-left: 2px solid var(--amber);
+    }
+    .about-box::after {
+      content: '';
+      position: absolute;
+      bottom: -6px; right: -6px;
+      width: 30%; height: 30%;
+      border-bottom: 2px solid var(--amber);
+      border-right: 2px solid var(--amber);
+    }
+    .quote {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: var(--white);
+      margin-bottom: 1.5rem;
+    }
+    .quote-attr {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--amber);
+    }
+
+    /* Why Choose */
+    #why {
+      background: var(--dark);
+    }
+    .why-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    .why-header h2 { margin: 0 auto; }
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+    }
+    .why-item {
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    .why-icon {
+      width: 48px; height: 48px;
+      margin: 0 auto 1.5rem;
+      color: var(--amber);
+    }
+    .why-item h4 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.6rem;
+    }
+    .why-item p {
+      font-size: 0.77rem;
+      color: var(--light);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.7;
+    }
+
+    /* Contact */
+    #contact {
+      background: var(--black);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      padding: 7rem 3rem;
+    }
+    #contact h2 { margin-bottom: 1rem; }
+    #contact > div:first-child p {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 300;
+      color: var(--light);
+      font-size: 0.88rem;
+      line-height: 1.8;
+      margin-bottom: 2.5rem;
+    }
+    .contact-detail {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+      font-size: 0.8rem;
+    }
+    .contact-detail-icon {
+      width: 18px; height: 18px;
+      color: var(--amber);
+      flex-shrink: 0;
+    }
+    .contact-detail span { color: var(--light); }
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    label {
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    input, select, textarea {
+      background: var(--mid);
+      border: 1px solid var(--border);
+      color: var(--white);
+      padding: 0.8rem 1rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 300;
+      outline: none;
+      transition: border-color 0.2s;
+      appearance: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--amber); }
+    textarea { resize: vertical; min-height: 120px; }
+    select option { background: var(--mid); }
+    .submit-btn {
+      background: var(--amber);
+      color: var(--black);
+      border: none;
+      padding: 1rem 2.5rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 500;
+      cursor: none;
+      align-self: flex-start;
+      transition: background 0.2s, transform 0.15s;
+      margin-top: 0.5rem;
+    }
+    .submit-btn:hover { background: var(--amber-bright); transform: translateY(-2px); }
+
+    /* Footer */
+    footer {
+      background: var(--dark);
+      border-top: 1px solid var(--border);
+      padding: 2rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem;
+      letter-spacing: 0.12em;
+      color: var(--amber);
+    }
+    .footer-logo span { color: var(--white); }
+    footer p {
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+    }
+    .footer-links a {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--amber); }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 1.5rem; }
+      nav ul { display: none; }
+      .hero { grid-template-columns: 1fr; }
+      .hero-right { display: none; }
+      .hero-left { padding: 7rem 1.5rem 5rem; }
+      h1 { font-size: clamp(4rem, 14vw, 6rem); }
+      .services-header { grid-template-columns: 1fr; gap: 1.5rem; }
+      .services-grid { grid-template-columns: 1fr; }
+      #about { grid-template-columns: 1fr; gap: 3rem; padding: 4rem 1.5rem; }
+      .why-grid { grid-template-columns: 1fr 1fr; }
+      #contact { grid-template-columns: 1fr; gap: 3rem; padding: 4rem 1.5rem; }
+      section { padding: 4rem 1.5rem; }
+      footer { flex-direction: column; gap: 1rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">Issy's<span> Garage</span></div>
+    <ul>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#why">Why Me</a></li>
+      <li><a href="#contact" class="nav-cta">Book a Job</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <p class="hero-tag">Independent Mechanic · Est. 2026</p>
+      <h1>
+        Honest Work.
+        <span class="accent">No BS.</span>
+      </h1>
+      <p class="hero-sub">
+        Mobile and workshop repairs done right — diagnosed correctly the first time,
+        priced fairly, and explained clearly. No upselling, no mystery invoices.
+      </p>
+      <div class="hero-ctas">
+        <a href="#contact" class="btn-primary">Book a Job</a>
+        <a href="#services" class="btn-ghost">See Services</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-graphic">
+        <!-- Gear SVG -->
+        <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M100 60a40 40 0 1 0 0 80 40 40 0 0 0 0-80zm0 10a30 30 0 1 1 0 60 30 30 0 0 1 0-60z" fill="white"/>
+          <path d="M85 20h30v20H85zM85 160h30v20H85zM20 85h20v30H20zM160 85h20v30H160z
+                   M35 35l14 14-10 10-14-14zM151 151l14 14-10 10-14-14zM35 165l10-10 14 14-10 10z
+                   M151 49l10-10 14 14-10 10z" fill="white"/>
+        </svg>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-num">8+</div>
+          <div class="stat-label">Years experience</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">200+</div>
+          <div class="stat-label">Jobs completed</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">ALL</div>
+          <div class="stat-label">Makes & models</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">100%</div>
+          <div class="stat-label">Upfront pricing</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="services-header reveal">
+      <div>
+        <p class="section-label">// What I Do</p>
+        <h2>Services</h2>
+      </div>
+      <p>
+        From routine maintenance to full engine diagnostics — I handle it all with the
+        same care. I work around your schedule and come to you, or you can drop the car at
+        my private workshop.
+      </p>
+    </div>
+    <div class="services-grid reveal">
+      <div class="service-card">
+        <div class="service-num">01 —</div>
+        <svg class="service-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm1-13h-2v6l5.25 3.15.75-1.23-4-2.42V7z"/></svg>
+        <h3>Routine Maintenance</h3>
+        <p>Oil changes, fluid top-ups, filter replacements, spark plugs, belts, and full service intervals. Keeping your car healthy and your warranty intact.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-num">02 —</div>
+        <svg class="service-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        <h3>Diagnostics</h3>
+        <p>OBD-II scanning, fault code analysis, and proper root-cause diagnosis. No guesswork, no unnecessary part replacements.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-num">03 —</div>
+        <svg class="service-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 11H7.83l4.88-4.88c.39-.39.39-1.03 0-1.42-.39-.39-1.02-.39-1.41 0l-6.59 6.59c-.39.39-.39 1.02 0 1.41l6.59 6.59c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L7.83 13H19c.55 0 1-.45 1-1s-.45-1-1-1z"/></svg>
+        <h3>Brakes & Suspension</h3>
+        <p>Pads, discs, callipers, wheel bearings, shock absorbers, springs, and geometry checks. Safety-critical work done with zero shortcuts.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-num">04 —</div>
+        <h3>Engine & Gearbox</h3>
+        <p>Timing chain/belt jobs, head gaskets, clutch replacements, and gearbox rebuilds. Complex work explained in plain English before we touch anything.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-num">05 —</div>
+        <h3>Electrical & AC</h3>
+        <p>Battery, alternator, starter motor, wiring faults, and full air conditioning service including regas and leak detection.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-num">06 —</div>
+        <h3>MOT Prep & Pre-Buy</h3>
+        <p>Full pre-MOT inspection to catch failures before the day. Pre-purchase inspections so you know exactly what you're buying.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="about-content reveal">
+      <p class="section-label">// The Mechanic</p>
+      <h2>Built Different</h2>
+      <p>
+        I've spent the last 8 years working in a specialist dealer workshop, getting hands-on
+        with everything from your everyday hatchback to performance and classic vehicles.
+        Now I'm doing what I've always wanted — working for myself, and directly for you.
+      </p>
+      <p>
+        When you book with me, you get one mechanic who diagnoses, quotes, and fixes
+        your car. No handoffs, no inflated labour rates to cover overheads. Just honest,
+        skilled work from someone who genuinely loves cars.
+      </p>
+      <div class="about-badges">
+        <span class="badge">IMI Qualified</span>
+        <span class="badge">ATA Certified</span>
+        <span class="badge">Fully Insured</span>
+        <span class="badge">All Makes & Models</span>
+        <span class="badge">Mobile Available</span>
+        <span class="badge">Manufacturer Tooling</span>
+      </div>
+    </div>
+    <div class="about-visual reveal">
+      <div class="about-box">
+        <p class="quote">
+          "I got three quotes for my head gasket and two garages refused to give me a
+          straight answer. Issy quoted me in 10 minutes, completed it in two days, and
+          the price didn't move. Unreal."
+        </p>
+        <p class="quote-attr">— James E., Audi A1</p>
+        <div style="height: 2rem;"></div>
+        <p class="quote">
+          "Took my car to two places who said I needed new brakes all round. Issy found
+          a seized calliper, freed it, and I was out for £80 instead of £400."
+        </p>
+        <p class="quote-attr">— Lorna B., Toyota Aygo</p> 
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY -->
+  <section id="why">
+    <div class="why-header reveal">
+      <p class="section-label">// The Difference</p>
+      <h2>Why Book With Me</h2>
+    </div>
+    <div class="why-grid reveal">
+      <div class="why-item">
+        <svg class="why-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 1 1-20 0 10 10 0 0 1 20 0z"/>
+        </svg>
+        <h4>No Hidden Waiting</h4>
+        <p>I quote a timeframe and I hit it. You'll know when your car is ready before it goes in.</p>
+      </div>
+      <div class="why-item">
+        <svg class="why-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+        </svg>
+        <h4>Fixed Quotes</h4>
+        <p>The price I quote is the price you pay. No surprise additions on collection day.</p>
+      </div>
+      <div class="why-item">
+        <svg class="why-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3z"/>
+        </svg>
+        <h4>Dealer Parts, Independent Price</h4>
+        <p>OEM or quality aftermarket parts at a fraction of main dealer labour costs.</p>
+      </div>
+      <div class="why-item">
+        <svg class="why-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 0 0-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0"/>
+        </svg>
+        <h4>You Deal With Me Directly</h4>
+        <p>No service advisors, no middlemen. I'm the one who answers the phone and fixes the car.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="reveal">
+      <p class="section-label">// Get In Touch</p>
+      <h2>Book a Job</h2>
+      <p style="margin-top: 1.5rem; font-family: 'IBM Plex Sans'; font-weight: 300; color: var(--light); font-size: 0.88rem; line-height: 1.8;">
+        Tell me what's going on with your car and I'll get back to you within a few hours
+        with a diagnosis approach and a fixed quote. No commitment until you're happy.
+      </p>
+      <div style="margin-top: 2rem;">
+        <div class="contact-detail">
+          <svg class="contact-detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 0 1 2-2h3.28a1 1 0 0 1 .948.684l1.498 4.493a1 1 0 0 1-.502 1.21l-2.257 1.13a11.042 11.042 0 0 0 5.516 5.516l1.13-2.257a1 1 0 0 1 1.21-.502l4.493 1.498a1 1 0 0 1 .684.949V19a2 2 0 0 1-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+          </svg>
+          <span>077946739085</span>
+        </div>
+        <div class="contact-detail">
+          <svg class="contact-detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z"/>
+          </svg>
+          <span>hello@issysgarage.co.uk</span>
+        </div>
+        <div class="contact-detail">
+          <svg class="contact-detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+          </svg>
+          <span>Mobile (your location) or Workshop — South London area</span>
+        </div>
+      </div>
+    </div>
+    <form class="contact-form reveal" onsubmit="handleSubmit(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" placeholder="First Last" required />
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" placeholder="07xxx xxxxxx" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Car Make</label>
+          <input type="text" placeholder="e.g. Ford" required />
+        </div>
+        <div class="form-group">
+          <label>Model & Year</label>
+          <input type="text" placeholder="e.g. Focus 2019" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Service Type</label>
+        <select>
+          <option value="">Select a service</option>
+          <option>Routine Maintenance</option>
+          <option>Diagnostics / Warning Light</option>
+          <option>Brakes & Suspension</option>
+          <option>Engine / Gearbox</option>
+          <option>Electrical / AC</option>
+          <option>MOT Prep</option>
+          <option>Pre-Purchase Inspection</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Describe the problem</label>
+        <textarea placeholder="What's the car doing (or not doing)? Any warning lights, noises, when does it happen?"></textarea>
+      </div>
+      <button type="submit" class="submit-btn">Send Enquiry →</button>
+    </form>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Issy's<span> Garage</span></div>
+    <p>© 2026 Issy's Garage. Independent Mechanic.</p>
+    <div class="footer-links">
+      <a href="#services">Services</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </footer>
+
+  <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+    document.querySelectorAll('a, button, input, select, textarea, .service-card').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('grow'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('grow'));
+    });
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Form submit
+    function handleSubmit(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('.submit-btn');
+      btn.textContent = 'Sent ✓';
+      btn.style.background = '#2a6e2a';
+      setTimeout(() => {
+        btn.textContent = 'Send Enquiry →';
+        btn.style.background = '';
+        e.target.reset();
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
